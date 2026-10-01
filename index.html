@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Ошибки сборщиков</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#121212;--text:#e8e8e8;--hint:#8b8b90;
+  --btn:#e5484d;--btnt:#fff;--sec:#1c1c1e;--line:#2a2a2c;--red:#e5484d;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,sans-serif}
+#app{height:100%;display:flex;flex-direction:column}
+#screen{flex:1;overflow-y:auto;padding:16px 16px 24px}
+h1{font-size:22px;margin:0 0 14px}h2{font-size:15px;margin:18px 0 8px;color:var(--hint);font-weight:600}
+.card{background:var(--sec);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px}
+.total{text-align:center;padding:24px 14px}
+.total b{display:block;font-size:56px;line-height:1.1}
+.total span{color:var(--hint);font-size:14px}
+.row{display:flex;gap:10px}.row .card{flex:1;min-width:0}
+.mini small{color:var(--hint);display:block;font-size:12px;margin-bottom:6px}
+.mini .n{font-size:26px;font-weight:700}
+.mini .tg{font-size:13px;color:var(--btn);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.nm{font-weight:600}.sb{font-size:13px;color:var(--hint)}
+.badge{background:var(--red);color:#fff;border-radius:20px;padding:3px 11px;font-weight:700;font-size:14px;white-space:nowrap}
+.badge.z{background:var(--line);color:var(--hint)}
+button{font:inherit;border:0;border-radius:12px;padding:12px 16px;cursor:pointer}
+.btn{background:var(--btn);color:var(--btnt);width:100%;font-weight:600;margin-top:6px}
+.btn.red{background:var(--red);color:#fff}.btn.gray{background:var(--line);color:var(--text)}
+.x{background:none;color:var(--red);padding:4px 8px;font-size:18px}
+input{font:inherit;width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--text);margin-bottom:8px}
+nav{display:flex;background:var(--sec);border-top:1px solid var(--line);padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px))}
+nav button{flex:1;background:none;color:var(--hint);font-size:10px;padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:8px}
+nav button i{font-style:normal;font-size:20px}
+nav button.on{color:var(--btn)}
+.bar{height:6px;border-radius:3px;background:var(--line);margin-top:8px;overflow:hidden}
+.bar div{height:100%;background:var(--red);border-radius:4px}
+.back{background:none;color:var(--btn);padding:0 0 10px;font-weight:600}
+.empty{text-align:center;color:var(--hint);padding:24px 0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chip{background:var(--sec);border:1px solid var(--line);color:var(--text);padding:8px 12px;font-size:13px;border-radius:20px}
+.chip.on{background:var(--btn);color:var(--btnt)}
+.dates{display:flex;gap:8px}.dates label{flex:1;font-size:12px;color:var(--hint)}
+.dates input{margin:4px 0 0}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;z-index:9}
+#modal.show{display:flex}
+#mbox{background:var(--sec);width:100%;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:85%;overflow-y:auto}
+#mbox h3{margin:0 0 12px}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;display:none;z-index:20;text-align:center;max-width:90%}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="screen"></div>
+  <nav id="nav">
+    <button data-t="home"><i>🏠</i>Главная</button>
+    <button data-t="list"><i>👥</i>Сборщики</button>
+    <button data-t="types"><i>⚠️</i>Типы</button>
+    <button data-t="stats"><i>📊</i>Статистика</button>
+  </nav>
+</div>
+<div id="modal"><div id="mbox"></div></div>
+<div id="toast"></div>
+
+<script>
+const tg = window.Telegram && Telegram.WebApp;
+if (tg) { tg.ready(); tg.expand(); try{tg.setHeaderColor('#121212');tg.setBackgroundColor('#121212');tg.setBottomBarColor&&tg.setBottomBarColor('#1c1c1e')}catch(e){} }
+
+/* ---------- Хранилище: Telegram CloudStorage (fallback: localStorage) ---------- */
+const CS = tg && tg.CloudStorage && tg.isVersionAtLeast && tg.isVersionAtLeast('6.9') ? tg.CloudStorage : null;
+const store = {
+  get(keys){return new Promise(res=>{
+    if(!keys.length) return res({});
+    if(CS) CS.getItems(keys,(e,v)=>res(e?{}:v||{}));
+    else{const o={};keys.forEach(k=>{const v=localStorage.getItem(k);if(v!==null)o[k]=v});res(o)}
+  })},
+  set(k,v){return new Promise(res=>{ if(CS) CS.setItem(k,v,()=>res()); else{localStorage.setItem(k,v);res()} })},
+  del(k){return new Promise(res=>{ if(CS) CS.removeItem(k,()=>res()); else{localStorage.removeItem(k);res()} })}
+};
+
+/* Данные:
+   types  [{id,name}]
+   people [{id,sur,ini,phone,tg,nc}]   (nc = число блоков с ошибками)
+   errs   [{p,t,ts}]                   (человек, тип, время в мс)
+   Ошибки хранятся блоками по 100 шт. (лимит CloudStorage 4096 символов на ключ) */
+const CHUNK = 100;
+let types=[], people=[], errs=[];
+let tab='home', openId=null;
+let per = (()=>{const d=new Date();return {from:fmtD(new Date(d.getFullYear(),d.getMonth(),1)),to:fmtD(d)}})();
+let sel = {p:null,t:null};
+
+const uid = () => Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2,5);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nick = s => { s=(s||'').trim().replace(/^@/,''); return s?'@'+s:'—' };
+const initials = p => p.nm ? (p.nm[0].toUpperCase()+'.'+(p.pat?p.pat[0].toUpperCase()+'.':'')) : (p.ini||'');
+const pname = p => (p.sur+' '+initials(p)).trim();
+const fullname = p => p.nm ? [p.sur,p.nm,p.pat].filter(Boolean).join(' ') : pname(p);
+const tname = id => { const t=types.find(x=>x.id===id); return t?t.name:'Удалённый тип' };
+const total = p => errs.reduce((a,e)=>a+(e.p===p.id?1:0),0);
+function fmtD(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+const fmtDT = ts => new Date(ts).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+const saveTypes = () => store.set('types', JSON.stringify(types));
+const saveIds = () => store.set('ids', JSON.stringify(people.map(p=>p.id)));
+const savePerson = p => store.set('c_'+p.id, JSON.stringify(p));
+const saveChunk = (pid,n) => store.set('e_'+pid+'_'+n, JSON.stringify(errs.filter(e=>e.p===pid).slice(n*CHUNK,(n+1)*CHUNK).map(e=>[e.t,e.ts])));
+
+async function load(){
+  const base = await store.get(['types','ids']);
+  try{types = JSON.parse(base.types||'[]')}catch{types=[]}
+  let ids=[]; try{ids = JSON.parse(base.ids||'[]')}catch{}
+  const data = await store.get(ids.map(i=>'c_'+i));
+  people = ids.map(i=>{try{return JSON.parse(data['c_'+i])}catch{return null}}).filter(Boolean);
+  const keys=[]; people.forEach(p=>{for(let n=0;n<(p.nc||0);n++)keys.push('e_'+p.id+'_'+n)});
+  const ed = await store.get(keys);
+  errs=[];
+  people.forEach(p=>{for(let n=0;n<(p.nc||0);n++){
+    try{(JSON.parse(ed['e_'+p.id+'_'+n]||'[]')).forEach(a=>errs.push({p:p.id,t:a[0],ts:a[1]}))}catch{}
+  }});
+  render();
+}
+
+/* ---------- UI helpers ---------- */
+function modal(html){document.getElementById('mbox').innerHTML=html;document.getElementById('modal').classList.add('show')}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+let tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',2600)}
+
+function render(){
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+  const s=document.getElementById('screen');
+  s.innerHTML = tab==='home'?home(): tab==='list'?(openId?profile():list()): tab==='types'?typesView(): stats();
+}
+
+/* ---------- Экраны ---------- */
+function monthErrs(){
+  const d=new Date();
+  const a=new Date(d.getFullYear(),d.getMonth(),1).getTime(), b=new Date(d.getFullYear(),d.getMonth()+1,1).getTime();
+  return errs.filter(e=>e.ts>=a&&e.ts<b);
+}
+function home(){
+  const list=monthErrs();
+  const cnt=p=>list.filter(e=>e.p===p.id).length;
+  let mx=null,mn=null;
+  people.forEach(p=>{ if(!mx||cnt(p)>cnt(mx))mx=p; if(!mn||cnt(p)<cnt(mn))mn=p });
+  const box=(label,p)=>`<div class="card mini"><small>${label}</small>${p?`<div class="n">${cnt(p)}</div><div class="tg">${esc(nick(p.tg))}</div><div class="sb">${esc(pname(p))}</div>`:`<div class="n">—</div>`}</div>`;
+  const mon=new Date().toLocaleString('ru-RU',{month:'long',year:'numeric'});
+  const last=[...list].sort((a,b)=>b.ts-a.ts);
+  return `<div class="sb" style="text-align:center;margin-bottom:8px">${esc(mon)}</div>
+  <div class="card total"><span>Общая сумма ошибок</span><b>${list.length}</b></div>
+  <div class="row">${box('Больше всего ошибок',mx)}${box('Меньше всего ошибок',mn)}</div>
+  <h2>Последние ошибки</h2>
+  ${last.map(e=>{const p=people.find(x=>x.id===e.p);return `<div class="card"><div class="item"><span class="nm">${esc(p?pname(p):'—')}</span><span class="sb">${fmtDT(e.ts)}</span></div><div class="sb" style="color:var(--text)">${esc(tname(e.t))}</div></div>`}).join('')||'<div class="empty">В этом месяце ошибок нет</div>'}`;
+}
+
+function typesView(){
+  return `<h1>Типы ошибок</h1>
+  ${types.length?types.map(t=>`<div class="card item"><span class="nm">${esc(t.name)}</span><button class="x" onclick="delType('${t.id}')">✕</button></div>`).join(''):'<div class="empty">Типов пока нет</div>'}
+  <button class="btn" onclick="addType()">+ Добавить тип ошибки</button>`;
+}
+
+function list(){
+  return `<h1>Сборщики</h1>
+  ${people.length?people.map(p=>`<div class="card item" onclick="openP('${p.id}')"><div><div class="nm">${esc(pname(p))}</div><div class="sb">${esc(nick(p.tg))}${p.phone?' · '+esc(p.phone):''}</div></div><span class="badge ${total(p)?'':'z'}">${total(p)}</span></div>`).join(''):'<div class="empty">Сборщиков пока нет</div>'}
+  <button class="btn" onclick="addPerson()">+ Добавить сборщика</button>`;
+}
+
+function profile(){
+  const p=people.find(x=>x.id===openId); if(!p){openId=null;return list()}
+  const mine=errs.filter(e=>e.p===p.id);
+  const cnt={}; mine.forEach(e=>cnt[e.t]=(cnt[e.t]||0)+1);
+  return `<button class="back" onclick="openP(null)">‹ Назад</button>
+  <div class="card"><h1 style="margin:0 0 6px">${esc(fullname(p))}</h1>
+  <div class="sb">Телефон: ${esc(p.phone||'—')}</div><div class="sb">Telegram: ${esc(nick(p.tg))}</div>
+  <div style="margin-top:10px">Всего ошибок: <span class="badge ${mine.length?'':'z'}">${mine.length}</span></div></div>
+  <button class="btn" onclick="addErr('${p.id}')">+ Добавить ошибку</button>
+  <h2>По типам</h2>
+  ${Object.keys(cnt).length?Object.keys(cnt).map(t=>`<div class="card item"><span>${esc(tname(t))}</span><b>${cnt[t]}</b></div>`).join(''):'<div class="empty">Ошибок нет</div>'}
+  <h2>История (дата и время)</h2>
+  ${mine.length?[...mine].reverse().map(e=>`<div class="card item"><span>${esc(tname(e.t))}</span><span class="sb">${fmtDT(e.ts)}</span></div>`).join(''):'<div class="empty">Пусто</div>'}
+  <button class="btn red" onclick="delPerson('${p.id}')">Удалить профиль</button>`;
+}
+
+/* ----- Статистика ----- */
+function range(){
+  const a = per.from? new Date(per.from+'T00:00:00').getTime() : -Infinity;
+  const b = per.to? new Date(per.to+'T23:59:59.999').getTime() : Infinity;
+  return errs.filter(e=>e.ts>=a&&e.ts<=b);
+}
+function setPreset(k){
+  const d=new Date(), t=fmtD(d);
+  if(k==='today') per={from:t,to:t};
+  else if(k==='week') per={from:fmtD(new Date(d.getFullYear(),d.getMonth(),d.getDate()-6)),to:t};
+  else if(k==='month') per={from:fmtD(new Date(d.getFullYear(),d.getMonth(),1)),to:t};
+  else per={from:'',to:''};
+  sel={p:null,t:null}; render();
+}
+function setDate(k,v){per[k]=v;sel={p:null,t:null};render()}
+function presetOn(k){
+  const d=new Date(), t=fmtD(d);
+  if(k==='today')return per.from===t&&per.to===t;
+  if(k==='week')return per.from===fmtD(new Date(d.getFullYear(),d.getMonth(),d.getDate()-6))&&per.to===t;
+  if(k==='month')return per.from===fmtD(new Date(d.getFullYear(),d.getMonth(),1))&&per.to===t;
+  return !per.from&&!per.to;
+}
+function periodLabel(){return !per.from&&!per.to?'Всё время':(per.from||'…')+' — '+(per.to||'…')}
+
+function stats(){
+  const list=range();
+  const controls = `<h1>Статистика</h1>
+  <div class="chips">${[['today','Сегодня'],['week','7 дней'],['month','Месяц'],['all','Всё время']].map(([k,l])=>`<button class="chip ${presetOn(k)?'on':''}" onclick="setPreset('${k}')">${l}</button>`).join('')}</div>
+  <div class="dates"><label>С<input type="date" value="${per.from}" onchange="setDate('from',this.value)"></label><label>По<input type="date" value="${per.to}" onchange="setDate('to',this.value)"></label></div>`;
+
+  // уровень 2: время ошибок
+  if(sel.p && sel.t){
+    const p=people.find(x=>x.id===sel.p);
+    const rows=list.filter(e=>e.p===sel.p&&e.t===sel.t).reverse();
+    return controls+`<button class="back" onclick="sel.t=null;render()">‹ Назад</button>
+    <div class="card"><div class="nm">${esc(p?pname(p):'')}</div><div class="sb">${esc(tname(sel.t))} · ${rows.length}</div></div>
+    ${rows.map(e=>`<div class="card">${fmtDT(e.ts)}</div>`).join('')||'<div class="empty">Нет ошибок</div>'}`;
+  }
+  // уровень 1: типы у человека
+  if(sel.p){
+    const p=people.find(x=>x.id===sel.p);
+    const mine=list.filter(e=>e.p===sel.p), cnt={};
+    mine.forEach(e=>cnt[e.t]=(cnt[e.t]||0)+1);
+    return controls+`<button class="back" onclick="sel.p=null;render()">‹ Назад</button>
+    <div class="card item"><span class="nm">${esc(p?pname(p):'')}</span><span class="badge">${mine.length}</span></div>
+    ${Object.keys(cnt).map(t=>`<div class="card item" onclick="sel.t='${t}';render()"><span>${esc(tname(t))}</span><b>${cnt[t]} ›</b></div>`).join('')||'<div class="empty">Нет ошибок за период</div>'}`;
+  }
+  // уровень 0: люди
+  const rows=people.map(p=>({p,c:list.filter(e=>e.p===p.id).length})).filter(r=>r.c>0).sort((a,b)=>b.c-a.c);
+  const mx=Math.max(1,...rows.map(r=>r.c));
+  return controls+`<div class="card item" style="margin-top:12px"><span>Всего за период</span><b>${list.length}</b></div>
+  ${rows.map(r=>`<div class="card" onclick="sel.p='${r.p.id}';render()"><div class="item"><span class="nm">${esc(pname(r.p))}</span><b>${r.c} ›</b></div><div class="bar"><div style="width:${r.c/mx*100}%"></div></div></div>`).join('')||'<div class="empty">Нет ошибок за период</div>'}
+  <button class="btn" onclick="copyStats()">📋 Скопировать статистику</button>`;
+}
+
+function copyStats(){
+  const list=range(), blocks=[];
+  people.forEach(p=>{
+    const mine=list.filter(e=>e.p===p.id); if(!mine.length)return;
+    const cnt={}; mine.forEach(e=>cnt[e.t]=(cnt[e.t]||0)+1);
+    blocks.push(pname(p)+'\n'+Object.keys(cnt).map(t=>tname(t)+' - '+cnt[t]).join('\n'));
+  });
+  const text=blocks.join('\n\n');
+  if(!text){toast('Нет данных за период');return}
+  const fallback=()=>{const a=document.createElement('textarea');a.value=text;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('Скопировано ✅')}catch{toast('Не удалось скопировать')}a.remove()};
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(()=>toast('Скопировано ✅'),fallback);
+  else fallback();
+}
+
+/* ---------- Действия ---------- */
+function openP(id){openId=id;render()}
+
+function addType(){
+  modal(`<h3>Новый тип ошибки</h3><input id="i1" placeholder="Название ошибки"><button class="btn" onclick="doAddType()">Добавить</button><button class="btn gray" onclick="closeModal()">Отмена</button>`);
+}
+async function doAddType(){
+  const v=document.getElementById('i1').value.trim(); if(!v)return;
+  types.push({id:uid(),name:v}); closeModal(); render(); await saveTypes();
+}
+let cb=null;
+function ask(msg,fn){cb=fn;modal(`<h3>${esc(msg)}</h3><button class="btn red" onclick="closeModal();cb&&cb()">Да, удалить</button><button class="btn gray" onclick="closeModal()">Отмена</button>`)}
+function delType(id){ask('Удалить тип ошибки? В старых записях он будет отображаться как «Удалённый тип».',()=>doDelType(id))}
+async function doDelType(id){
+  types=types.filter(t=>t.id!==id); render(); await saveTypes();
+}
+
+function addPerson(){
+  modal(`<h3>Новый сборщик</h3>
+  <input id="i1" placeholder="Фамилия"><input id="i2" placeholder="Имя"><input id="i5" placeholder="Отчество">
+  <input id="i3" type="tel" placeholder="Номер телефона"><input id="i4" placeholder="Ник в Telegram (@username)">
+  <button class="btn" onclick="doAddPerson()">Добавить</button><button class="btn gray" onclick="closeModal()">Отмена</button>`);
+}
+async function doAddPerson(){
+  const v=i=>document.getElementById(i).value.trim();
+  if(!v('i1')||!v('i2'))return;
+  const p={id:uid(),sur:v('i1'),nm:v('i2'),pat:v('i5'),phone:v('i3'),tg:v('i4'),nc:0};
+  people.push(p); closeModal(); render(); await savePerson(p); await saveIds();
+}
+function delPerson(id){ask('Удалить профиль сборщика вместе с его ошибками?',()=>doDelPerson(id))}
+async function doDelPerson(id){
+  const p=people.find(x=>x.id===id);
+  people=people.filter(x=>x.id!==id); errs=errs.filter(e=>e.p!==id); openId=null; render();
+  if(p){for(let n=0;n<(p.nc||0);n++)await store.del('e_'+id+'_'+n); await store.del('c_'+id)}
+  await saveIds();
+}
+
+function addErr(id){
+  if(!types.length){modal(`<h3>Нет типов ошибок</h3><div class="sb" style="margin-bottom:10px">Сначала добавьте их во вкладке «Типы».</div><button class="btn gray" onclick="closeModal()">Ок</button>`);return}
+  modal(`<h3>Выберите тип ошибки</h3>${types.map(t=>`<button class="btn gray" style="margin-bottom:6px" onclick="doAddErr('${id}','${t.id}')">${esc(t.name)}</button>`).join('')}<button class="btn gray" onclick="closeModal()">Отмена</button>`);
+}
+async function doAddErr(pid,tid){
+  const p=people.find(x=>x.id===pid); if(!p)return;
+  const ts=Date.now();
+  errs.push({p:pid,t:tid,ts});
+  const n=Math.floor((errs.filter(e=>e.p===pid).length-1)/CHUNK);
+  const newChunk = n+1>(p.nc||0);
+  if(newChunk) p.nc=n+1;
+  closeModal(); render(); toast('Ошибка добавлена: '+fmtDT(ts));
+  if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('warning');
+  await saveChunk(pid,n);
+  if(newChunk) await savePerson(p);
+}
+
+document.getElementById('nav').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  tab=b.dataset.t; openId=null; sel={p:null,t:null}; render();
+});
+
+load();
+</script>
+</body>
+</html>
