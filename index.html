@@ -59,10 +59,11 @@ nav button.on{color:var(--btn)}
 <div id="app">
   <div id="screen"></div>
   <nav id="nav">
-    <button data-t="home"><i>🏠</i>Главная</button>
-    <button data-t="list"><i>👥</i>Сборщики</button>
-    <button data-t="types"><i>⚠️</i>Типы</button>
-    <button data-t="stats"><i>📊</i>Статистика</button>
+    <button data-t="home"></button>
+    <button data-t="list"></button>
+    <button data-t="types"></button>
+    <button data-t="stats"></button>
+    <button data-t="settings"></button>
   </nav>
 </div>
 <div id="modal"><div id="mbox"></div></div>
@@ -71,6 +72,88 @@ nav button.on{color:var(--btn)}
 <script>
 const tg = window.Telegram && Telegram.WebApp;
 if (tg) { tg.ready(); tg.expand(); try{tg.setHeaderColor('#121212');tg.setBackgroundColor('#121212');tg.setBottomBarColor&&tg.setBottomBarColor('#1c1c1e')}catch(e){} }
+
+/* ---------- Локализация ---------- */
+const I18N = {
+ru:{
+title:'Ошибки сборщиков',
+nav_home:'Главная',nav_list:'Сборщики',nav_types:'Типы',nav_stats:'Статистика',nav_settings:'Настройки',
+total_errors:'Общая сумма ошибок',most:'Больше всего ошибок',least:'Меньше всего ошибок',recent:'Последние ошибки',none_month:'В этом месяце ошибок нет',
+deleted_type:'Удалённый тип',
+types_title:'Типы ошибок',no_types:'Типов пока нет',add_type:'+ Добавить тип ошибки',
+pickers_title:'Сборщики',no_pickers:'Сборщиков пока нет',add_picker:'+ Добавить сборщика',
+back:'‹ Назад',phone:'Телефон',telegram:'Telegram',total_errs:'Всего ошибок',add_err:'+ Добавить ошибку',edit_data:'✎ Редактировать данные',
+by_types:'По типам',no_errs:'Ошибок нет',history:'История (дата и время)',empty:'Пусто',del_profile:'Удалить профиль',
+stats_title:'Статистика',today:'Сегодня',d7:'7 дней',month:'Месяц',all_time:'Всё время',from:'С',to:'По',
+no_errs_period:'Нет ошибок за период',total_period:'Всего за период',copy:'📋 Скопировать',send_bot:'📤 В чат бота',
+no_data:'Нет данных за период',copied:'Скопировано ✅',copy_fail:'Не удалось скопировать',
+tg_only:'Работает только внутри Telegram',too_much:'Слишком много данных — выберите период покороче',
+send_fail:'Не удалось отправить. Откройте приложение кнопкой из клавиатуры бота',
+new_type:'Новый тип ошибки',type_name:'Название ошибки',add:'Добавить',cancel:'Отмена',
+confirm_del_type:'Удалить тип ошибки? В старых записях он будет отображаться как «Удалённый тип».',
+yes_del:'Да, удалить',edit_type:'Изменить тип ошибки',save:'Сохранить',saved:'Сохранено ✅',
+new_picker:'Новый сборщик',surname:'Фамилия',name:'Имя',patr:'Отчество',phone_ph:'Номер телефона',tg_ph:'Ник в Telegram (@username)',
+confirm_del_picker:'Удалить профиль сборщика вместе с его ошибками?',
+no_types_title:'Нет типов ошибок',no_types_hint:'Сначала добавьте их во вкладке «Типы».',ok:'Ок',
+pick_type:'Выберите тип ошибки',edit_picker:'Редактировать сборщика',err_added:'Ошибка добавлена:',
+settings_title:'Настройки',language:'Язык'
+},
+en:{
+title:'Picker errors',
+nav_home:'Home',nav_list:'Pickers',nav_types:'Types',nav_stats:'Statistics',nav_settings:'Settings',
+total_errors:'Total errors',most:'Most errors',least:'Fewest errors',recent:'Recent errors',none_month:'No errors this month',
+deleted_type:'Deleted type',
+types_title:'Error types',no_types:'No types yet',add_type:'+ Add error type',
+pickers_title:'Pickers',no_pickers:'No pickers yet',add_picker:'+ Add picker',
+back:'‹ Back',phone:'Phone',telegram:'Telegram',total_errs:'Total errors',add_err:'+ Add error',edit_data:'✎ Edit details',
+by_types:'By type',no_errs:'No errors',history:'History (date and time)',empty:'Empty',del_profile:'Delete profile',
+stats_title:'Statistics',today:'Today',d7:'7 days',month:'Month',all_time:'All time',from:'From',to:'To',
+no_errs_period:'No errors for this period',total_period:'Total for the period',copy:'📋 Copy',send_bot:'📤 To bot chat',
+no_data:'No data for this period',copied:'Copied ✅',copy_fail:'Could not copy',
+tg_only:'Works only inside Telegram',too_much:'Too much data — choose a shorter period',
+send_fail:"Could not send. Open the app using the button from the bot's keyboard",
+new_type:'New error type',type_name:'Error name',add:'Add',cancel:'Cancel',
+confirm_del_type:'Delete this error type? In old records it will appear as “Deleted type”.',
+yes_del:'Yes, delete',edit_type:'Edit error type',save:'Save',saved:'Saved ✅',
+new_picker:'New picker',surname:'Last name',name:'First name',patr:'Patronymic',phone_ph:'Phone number',tg_ph:'Telegram username (@username)',
+confirm_del_picker:"Delete the picker's profile along with their errors?",
+no_types_title:'No error types',no_types_hint:'Add them first in the “Types” tab.',ok:'OK',
+pick_type:'Choose an error type',edit_picker:'Edit picker',err_added:'Error added:',
+settings_title:'Settings',language:'Language'
+},
+uk:{
+title:'Помилки збирачів',
+nav_home:'Головна',nav_list:'Збирачі',nav_types:'Типи',nav_stats:'Статистика',nav_settings:'Налаштування',
+total_errors:'Загальна кількість помилок',most:'Найбільше помилок',least:'Найменше помилок',recent:'Останні помилки',none_month:'Цього місяця помилок немає',
+deleted_type:'Видалений тип',
+types_title:'Типи помилок',no_types:'Типів поки немає',add_type:'+ Додати тип помилки',
+pickers_title:'Збирачі',no_pickers:'Збирачів поки немає',add_picker:'+ Додати збирача',
+back:'‹ Назад',phone:'Телефон',telegram:'Telegram',total_errs:'Усього помилок',add_err:'+ Додати помилку',edit_data:'✎ Редагувати дані',
+by_types:'За типами',no_errs:'Помилок немає',history:'Історія (дата й час)',empty:'Порожньо',del_profile:'Видалити профіль',
+stats_title:'Статистика',today:'Сьогодні',d7:'7 днів',month:'Місяць',all_time:'Весь час',from:'Від',to:'До',
+no_errs_period:'Немає помилок за період',total_period:'Усього за період',copy:'📋 Копіювати',send_bot:'📤 У чат бота',
+no_data:'Немає даних за період',copied:'Скопійовано ✅',copy_fail:'Не вдалося скопіювати',
+tg_only:'Працює лише всередині Telegram',too_much:'Забагато даних — оберіть коротший період',
+send_fail:'Не вдалося надіслати. Відкрийте застосунок кнопкою з клавіатури бота',
+new_type:'Новий тип помилки',type_name:'Назва помилки',add:'Додати',cancel:'Скасувати',
+confirm_del_type:'Видалити тип помилки? У старих записах він відображатиметься як «Видалений тип».',
+yes_del:'Так, видалити',edit_type:'Змінити тип помилки',save:'Зберегти',saved:'Збережено ✅',
+new_picker:'Новий збирач',surname:'Прізвище',name:"Ім'я",patr:'По батькові',phone_ph:'Номер телефону',tg_ph:'Нік у Telegram (@username)',
+confirm_del_picker:'Видалити профіль збирача разом з його помилками?',
+no_types_title:'Немає типів помилок',no_types_hint:'Спочатку додайте їх на вкладці «Типи».',ok:'Гаразд',
+pick_type:'Оберіть тип помилки',edit_picker:'Редагувати збирача',err_added:'Помилку додано:',
+settings_title:'Налаштування',language:'Мова'
+}
+};
+const LOCALES = {ru:'ru-RU',en:'en-GB',uk:'uk-UA'};
+function detectLang(){
+  const c=((tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user&&tg.initDataUnsafe.user.language_code)||navigator.language||'ru').slice(0,2).toLowerCase();
+  return c==='uk'?'uk':c==='en'?'en':'ru';
+}
+let lang = detectLang();
+const L = k => (I18N[lang]&&I18N[lang][k]) || I18N.ru[k] || k;
+const LOC = () => LOCALES[lang]||'ru-RU';
+const NAV_ICONS = {home:'🏠',list:'👥',types:'⚠️',stats:'📊',settings:'⚙️'};
 
 /* ---------- Хранилище: Telegram CloudStorage (fallback: localStorage) ---------- */
 const CS = tg && tg.CloudStorage && tg.isVersionAtLeast && tg.isVersionAtLeast('6.9') ? tg.CloudStorage : null;
@@ -101,10 +184,10 @@ const nick = s => { s=(s||'').trim().replace(/^@/,''); return s?'@'+s:'—' };
 const initials = p => p.nm ? (p.nm[0].toUpperCase()+'.'+(p.pat?p.pat[0].toUpperCase()+'.':'')) : (p.ini||'');
 const pname = p => (p.sur+' '+initials(p)).trim();
 const fullname = p => p.nm ? [p.sur,p.nm,p.pat].filter(Boolean).join(' ') : pname(p);
-const tname = id => { const t=types.find(x=>x.id===id); return t?t.name:'Удалённый тип' };
+const tname = id => { const t=types.find(x=>x.id===id); return t?t.name:L('deleted_type') };
 const total = p => errs.reduce((a,e)=>a+(e.p===p.id?1:0),0);
 function fmtD(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-const fmtDT = ts => new Date(ts).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const fmtDT = ts => new Date(ts).toLocaleString(LOC(),{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 
 const saveTypes = () => store.set('types', JSON.stringify(types));
 const saveIds = () => store.set('ids', JSON.stringify(people.map(p=>p.id)));
@@ -112,7 +195,8 @@ const savePerson = p => store.set('c_'+p.id, JSON.stringify(p));
 const saveChunk = (pid,n) => store.set('e_'+pid+'_'+n, JSON.stringify(errs.filter(e=>e.p===pid).slice(n*CHUNK,(n+1)*CHUNK).map(e=>[e.t,e.ts])));
 
 async function load(){
-  const base = await store.get(['types','ids']);
+  const base = await store.get(['types','ids','lang']);
+  if(base.lang && I18N[base.lang]) lang=base.lang;
   try{types = JSON.parse(base.types||'[]')}catch{types=[]}
   let ids=[]; try{ids = JSON.parse(base.ids||'[]')}catch{}
   const data = await store.get(ids.map(i=>'c_'+i));
@@ -133,10 +217,17 @@ document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='
 let tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',2600)}
 
 function render(){
-  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+  document.documentElement.lang=lang; document.title=L('title');
+  document.querySelectorAll('#nav button').forEach(b=>{b.classList.toggle('on',b.dataset.t===tab);b.innerHTML='<i>'+NAV_ICONS[b.dataset.t]+'</i>'+esc(L('nav_'+b.dataset.t))});
   const s=document.getElementById('screen');
-  s.innerHTML = tab==='home'?home(): tab==='list'?(openId?profile():list()): tab==='types'?typesView(): stats();
+  s.innerHTML = tab==='home'?home(): tab==='list'?(openId?profile():list()): tab==='types'?typesView(): tab==='settings'?settings(): stats();
 }
+function settings(){
+  const langs=[['ru','Русский'],['en','English'],['uk','Українська']];
+  return `<h1>${L('settings_title')}</h1><h2>${L('language')}</h2>
+  ${langs.map(([k,n])=>`<div class="card item" onclick="setLang('${k}')"><span class="nm">${n}</span><span style="color:var(--btn);font-size:18px">${lang===k?'✓':''}</span></div>`).join('')}`;
+}
+async function setLang(k){ if(!I18N[k])return; lang=k; render(); await store.set('lang',k); }
 
 /* ---------- Экраны ---------- */
 function monthErrs(){
@@ -150,42 +241,42 @@ function home(){
   let mx=null,mn=null;
   people.forEach(p=>{ if(!mx||cnt(p)>cnt(mx))mx=p; if(!mn||cnt(p)<cnt(mn))mn=p });
   const box=(label,p)=>`<div class="card mini"><small>${label}</small>${p?`<div class="n">${cnt(p)}</div><div class="tg">${esc(nick(p.tg))}</div><div class="sb">${esc(pname(p))}</div>`:`<div class="n">—</div>`}</div>`;
-  const mon=new Date().toLocaleString('ru-RU',{month:'long',year:'numeric'});
+  const mon=new Date().toLocaleString(LOC(),{month:'long',year:'numeric'});
   const last=[...list].sort((a,b)=>b.ts-a.ts);
   return `<div class="sb" style="text-align:center;margin-bottom:8px">${esc(mon)}</div>
-  <div class="card total"><span>Общая сумма ошибок</span><b>${list.length}</b></div>
-  <div class="row">${box('Больше всего ошибок',mx)}${box('Меньше всего ошибок',mn)}</div>
-  <h2>Последние ошибки</h2>
-  ${last.map(e=>{const p=people.find(x=>x.id===e.p);return `<div class="card"><div class="item"><span class="nm">${esc(p?pname(p):'—')}</span><span class="sb">${fmtDT(e.ts)}</span></div><div class="sb" style="color:var(--text)">${esc(tname(e.t))}</div></div>`}).join('')||'<div class="empty">В этом месяце ошибок нет</div>'}`;
+  <div class="card total"><span>${L('total_errors')}</span><b>${list.length}</b></div>
+  <div class="row">${box(L('most'),mx)}${box(L('least'),mn)}</div>
+  <h2>${L('recent')}</h2>
+  ${last.map(e=>{const p=people.find(x=>x.id===e.p);return `<div class="card"><div class="item"><span class="nm">${esc(p?pname(p):'—')}</span><span class="sb">${fmtDT(e.ts)}</span></div><div class="sb" style="color:var(--text)">${esc(tname(e.t))}</div></div>`}).join('')||`<div class="empty">${L('none_month')}</div>`}`;
 }
 
 function typesView(){
-  return `<h1>Типы ошибок</h1>
-  ${types.length?types.map(t=>`<div class="card item"><span class="nm">${esc(t.name)}</span><span class="acts"><button class="ed" onclick="editType('${t.id}')">✎</button><button class="x" onclick="delType('${t.id}')">✕</button></span></div>`).join(''):'<div class="empty">Типов пока нет</div>'}
-  <button class="btn" onclick="addType()">+ Добавить тип ошибки</button>`;
+  return `<h1>${L('types_title')}</h1>
+  ${types.length?types.map(t=>`<div class="card item"><span class="nm">${esc(t.name)}</span><span class="acts"><button class="ed" onclick="editType('${t.id}')">✎</button><button class="x" onclick="delType('${t.id}')">✕</button></span></div>`).join(''):`<div class="empty">${L('no_types')}</div>`}
+  <button class="btn" onclick="addType()">${L('add_type')}</button>`;
 }
 
 function list(){
-  return `<h1>Сборщики</h1>
-  ${people.length?people.map(p=>`<div class="card item" onclick="openP('${p.id}')"><div><div class="nm">${esc(pname(p))}</div><div class="sb">${esc(nick(p.tg))}${p.phone?' · '+esc(p.phone):''}</div></div><span class="badge ${total(p)?'':'z'}">${total(p)}</span></div>`).join(''):'<div class="empty">Сборщиков пока нет</div>'}
-  <button class="btn" onclick="addPerson()">+ Добавить сборщика</button>`;
+  return `<h1>${L('pickers_title')}</h1>
+  ${people.length?people.map(p=>`<div class="card item" onclick="openP('${p.id}')"><div><div class="nm">${esc(pname(p))}</div><div class="sb">${esc(nick(p.tg))}${p.phone?' · '+esc(p.phone):''}</div></div><span class="badge ${total(p)?'':'z'}">${total(p)}</span></div>`).join(''):`<div class="empty">${L('no_pickers')}</div>`}
+  <button class="btn" onclick="addPerson()">${L('add_picker')}</button>`;
 }
 
 function profile(){
   const p=people.find(x=>x.id===openId); if(!p){openId=null;return list()}
   const mine=errs.filter(e=>e.p===p.id);
   const cnt={}; mine.forEach(e=>cnt[e.t]=(cnt[e.t]||0)+1);
-  return `<button class="back" onclick="openP(null)">‹ Назад</button>
+  return `<button class="back" onclick="openP(null)">${L('back')}</button>
   <div class="card"><h1 style="margin:0 0 6px">${esc(fullname(p))}</h1>
-  <div class="sb">Телефон: ${esc(p.phone||'—')}</div><div class="sb">Telegram: ${esc(nick(p.tg))}</div>
-  <div style="margin-top:10px">Всего ошибок: <span class="badge ${mine.length?'':'z'}">${mine.length}</span></div></div>
-  <button class="btn" onclick="addErr('${p.id}')">+ Добавить ошибку</button>
-  <button class="btn gray" onclick="editPerson('${p.id}')">✎ Редактировать данные</button>
-  <h2>По типам</h2>
-  ${Object.keys(cnt).length?Object.keys(cnt).map(t=>`<div class="card item"><span>${esc(tname(t))}</span><b>${cnt[t]}</b></div>`).join(''):'<div class="empty">Ошибок нет</div>'}
-  <h2>История (дата и время)</h2>
-  ${mine.length?[...mine].reverse().map(e=>`<div class="card item"><span>${esc(tname(e.t))}</span><span class="sb">${fmtDT(e.ts)}</span></div>`).join(''):'<div class="empty">Пусто</div>'}
-  <button class="btn red" onclick="delPerson('${p.id}')">Удалить профиль</button>`;
+  <div class="sb">${L('phone')}: ${esc(p.phone||'—')}</div><div class="sb">${L('telegram')}: ${esc(nick(p.tg))}</div>
+  <div style="margin-top:10px">${L('total_errs')}: <span class="badge ${mine.length?'':'z'}">${mine.length}</span></div></div>
+  <button class="btn" onclick="addErr('${p.id}')">${L('add_err')}</button>
+  <button class="btn gray" onclick="editPerson('${p.id}')">${L('edit_data')}</button>
+  <h2>${L('by_types')}</h2>
+  ${Object.keys(cnt).length?Object.keys(cnt).map(t=>`<div class="card item"><span>${esc(tname(t))}</span><b>${cnt[t]}</b></div>`).join(''):`<div class="empty">${L('no_errs')}</div>`}
+  <h2>${L('history')}</h2>
+  ${mine.length?[...mine].reverse().map(e=>`<div class="card item"><span>${esc(tname(e.t))}</span><span class="sb">${fmtDT(e.ts)}</span></div>`).join(''):`<div class="empty">${L('empty')}</div>`}
+  <button class="btn red" onclick="delPerson('${p.id}')">${L('del_profile')}</button>`;
 }
 
 /* ----- Статистика ----- */
@@ -210,37 +301,37 @@ function presetOn(k){
   if(k==='month')return per.from===fmtD(new Date(d.getFullYear(),d.getMonth(),1))&&per.to===t;
   return !per.from&&!per.to;
 }
-function periodLabel(){return !per.from&&!per.to?'Всё время':(per.from||'…')+' — '+(per.to||'…')}
+function periodLabel(){return !per.from&&!per.to?L('all_time'):(per.from||'…')+' — '+(per.to||'…')}
 
 function stats(){
   const list=range();
-  const controls = `<h1>Статистика</h1>
-  <div class="chips">${[['today','Сегодня'],['week','7 дней'],['month','Месяц'],['all','Всё время']].map(([k,l])=>`<button class="chip ${presetOn(k)?'on':''}" onclick="setPreset('${k}')">${l}</button>`).join('')}</div>
-  <div class="dates"><label>С<input type="date" value="${per.from}" onchange="setDate('from',this.value)"></label><label>По<input type="date" value="${per.to}" onchange="setDate('to',this.value)"></label></div>`;
+  const controls = `<h1>${L('stats_title')}</h1>
+  <div class="chips">${[['today',L('today')],['week',L('d7')],['month',L('month')],['all',L('all_time')]].map(([k,l])=>`<button class="chip ${presetOn(k)?'on':''}" onclick="setPreset('${k}')">${l}</button>`).join('')}</div>
+  <div class="dates"><label>${L('from')}<input type="date" value="${per.from}" onchange="setDate('from',this.value)"></label><label>${L('to')}<input type="date" value="${per.to}" onchange="setDate('to',this.value)"></label></div>`;
 
   // уровень 2: время ошибок
   if(sel.p && sel.t){
     const p=people.find(x=>x.id===sel.p);
     const rows=list.filter(e=>e.p===sel.p&&e.t===sel.t).reverse();
-    return controls+`<button class="back" onclick="sel.t=null;render()">‹ Назад</button>
+    return controls+`<button class="back" onclick="sel.t=null;render()">${L('back')}</button>
     <div class="card"><div class="nm">${esc(p?pname(p):'')}</div><div class="sb">${esc(tname(sel.t))} · ${rows.length}</div></div>
-    ${rows.map(e=>`<div class="card">${fmtDT(e.ts)}</div>`).join('')||'<div class="empty">Нет ошибок</div>'}`;
+    ${rows.map(e=>`<div class="card">${fmtDT(e.ts)}</div>`).join('')||`<div class="empty">${L('no_errs')}</div>`}`;
   }
   // уровень 1: типы у человека
   if(sel.p){
     const p=people.find(x=>x.id===sel.p);
     const mine=list.filter(e=>e.p===sel.p), cnt={};
     mine.forEach(e=>cnt[e.t]=(cnt[e.t]||0)+1);
-    return controls+`<button class="back" onclick="sel.p=null;render()">‹ Назад</button>
+    return controls+`<button class="back" onclick="sel.p=null;render()">${L('back')}</button>
     <div class="card item"><span class="nm">${esc(p?pname(p):'')}</span><span class="badge">${mine.length}</span></div>
-    ${Object.keys(cnt).map(t=>`<div class="card item" onclick="sel.t='${t}';render()"><span>${esc(tname(t))}</span><b>${cnt[t]} ›</b></div>`).join('')||'<div class="empty">Нет ошибок за период</div>'}`;
+    ${Object.keys(cnt).map(t=>`<div class="card item" onclick="sel.t='${t}';render()"><span>${esc(tname(t))}</span><b>${cnt[t]} ›</b></div>`).join('')||`<div class="empty">${L('no_errs_period')}</div>`}`;
   }
   // уровень 0: люди
   const rows=people.map(p=>({p,c:list.filter(e=>e.p===p.id).length})).filter(r=>r.c>0).sort((a,b)=>b.c-a.c);
   const mx=Math.max(1,...rows.map(r=>r.c));
-  return controls+`<div class="card item" style="margin-top:12px"><span>Всего за период</span><b>${list.length}</b></div>
-  ${rows.map(r=>`<div class="card" onclick="sel.p='${r.p.id}';render()"><div class="item"><span class="nm">${esc(pname(r.p))}</span><b>${r.c} ›</b></div><div class="bar"><div style="width:${r.c/mx*100}%"></div></div></div>`).join('')||'<div class="empty">Нет ошибок за период</div>'}
-  <div class="row" style="gap:8px"><button class="btn" onclick="copyStats()">📋 Скопировать</button><button class="btn" onclick="sendStats()">📤 В чат бота</button></div>`;
+  return controls+`<div class="card item" style="margin-top:12px"><span>${L('total_period')}</span><b>${list.length}</b></div>
+  ${rows.map(r=>`<div class="card" onclick="sel.p='${r.p.id}';render()"><div class="item"><span class="nm">${esc(pname(r.p))}</span><b>${r.c} ›</b></div><div class="bar"><div style="width:${r.c/mx*100}%"></div></div></div>`).join('')||`<div class="empty">${L('no_errs_period')}</div>`}
+  <div class="row" style="gap:8px"><button class="btn" onclick="copyStats()">${L('copy')}</button><button class="btn" onclick="sendStats()">${L('send_bot')}</button></div>`;
 }
 
 function statsText(){
@@ -254,16 +345,16 @@ function statsText(){
 }
 function sendStats(){
   const text=statsText();
-  if(!text){toast('Нет данных за период');return}
-  if(!tg||!tg.sendData){toast('Работает только внутри Telegram');return}
-  if(new Blob([text]).size>4096){toast('Слишком много данных — выберите период покороче');return}
-  try{tg.sendData(text)}catch(e){toast('Не удалось отправить. Откройте приложение кнопкой из клавиатуры бота')}
+  if(!text){toast(L('no_data'));return}
+  if(!tg||!tg.sendData){toast(L('tg_only'));return}
+  if(new Blob([text]).size>4096){toast(L('too_much'));return}
+  try{tg.sendData(text)}catch(e){toast(L('send_fail'))}
 }
 function copyStats(){
   const text=statsText();
-  if(!text){toast('Нет данных за период');return}
-  const fallback=()=>{const a=document.createElement('textarea');a.value=text;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('Скопировано ✅')}catch{toast('Не удалось скопировать')}a.remove()};
-  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(()=>toast('Скопировано ✅'),fallback);
+  if(!text){toast(L('no_data'));return}
+  const fallback=()=>{const a=document.createElement('textarea');a.value=text;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast(L('copied'))}catch{toast(L('copy_fail'))}a.remove()};
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(()=>toast(L('copied')),fallback);
   else fallback();
 }
 
@@ -271,7 +362,7 @@ function copyStats(){
 function openP(id){openId=id;render()}
 
 function addType(){
-  modal(`<h3>Новый тип ошибки</h3><input id="i1" placeholder="Название ошибки"><button class="btn" onclick="doAddType()">Добавить</button><button class="btn gray" onclick="closeModal()">Отмена</button>`);
+  modal(`<h3>${L('new_type')}</h3><input id="i1" placeholder="${L('type_name')}"><button class="btn" onclick="doAddType()">${L('add')}</button><button class="btn gray" onclick="closeModal()">${L('cancel')}</button>`);
 }
 async function doAddType(){
   const v=document.getElementById('i1').value.trim(); if(!v)return;
@@ -279,24 +370,24 @@ async function doAddType(){
 }
 function editType(id){
   const t=types.find(x=>x.id===id); if(!t)return;
-  modal(`<h3>Изменить тип ошибки</h3><input id="i1" placeholder="Название ошибки" value="${esc(t.name)}"><button class="btn" onclick="doEditType('${id}')">Сохранить</button><button class="btn gray" onclick="closeModal()">Отмена</button>`);
+  modal(`<h3>${L('edit_type')}</h3><input id="i1" placeholder="${L('type_name')}" value="${esc(t.name)}"><button class="btn" onclick="doEditType('${id}')">${L('save')}</button><button class="btn gray" onclick="closeModal()">${L('cancel')}</button>`);
 }
 async function doEditType(id){
   const t=types.find(x=>x.id===id); const v=document.getElementById('i1').value.trim(); if(!t||!v)return;
-  t.name=v; closeModal(); render(); await saveTypes(); toast('Сохранено ✅');
+  t.name=v; closeModal(); render(); await saveTypes(); toast(L('saved'));
 }
 let cb=null;
-function ask(msg,fn){cb=fn;modal(`<h3>${esc(msg)}</h3><button class="btn red" onclick="closeModal();cb&&cb()">Да, удалить</button><button class="btn gray" onclick="closeModal()">Отмена</button>`)}
-function delType(id){ask('Удалить тип ошибки? В старых записях он будет отображаться как «Удалённый тип».',()=>doDelType(id))}
+function ask(msg,fn){cb=fn;modal(`<h3>${esc(msg)}</h3><button class="btn red" onclick="closeModal();cb&&cb()">${L('yes_del')}</button><button class="btn gray" onclick="closeModal()">${L('cancel')}</button>`)}
+function delType(id){ask(L('confirm_del_type'),()=>doDelType(id))}
 async function doDelType(id){
   types=types.filter(t=>t.id!==id); render(); await saveTypes();
 }
 
 function addPerson(){
-  modal(`<h3>Новый сборщик</h3>
-  <input id="i1" placeholder="Фамилия"><input id="i2" placeholder="Имя"><input id="i5" placeholder="Отчество">
-  <input id="i3" type="tel" placeholder="Номер телефона"><input id="i4" placeholder="Ник в Telegram (@username)">
-  <button class="btn" onclick="doAddPerson()">Добавить</button><button class="btn gray" onclick="closeModal()">Отмена</button>`);
+  modal(`<h3>${L('new_picker')}</h3>
+  <input id="i1" placeholder="${L('surname')}"><input id="i2" placeholder="${L('name')}"><input id="i5" placeholder="${L('patr')}">
+  <input id="i3" type="tel" placeholder="${L('phone_ph')}"><input id="i4" placeholder="${L('tg_ph')}">
+  <button class="btn" onclick="doAddPerson()">${L('add')}</button><button class="btn gray" onclick="closeModal()">${L('cancel')}</button>`);
 }
 async function doAddPerson(){
   const v=i=>document.getElementById(i).value.trim();
@@ -306,19 +397,19 @@ async function doAddPerson(){
 }
 function editPerson(id){
   const p=people.find(x=>x.id===id); if(!p)return;
-  modal(`<h3>Редактировать сборщика</h3>
-  <input id="i1" placeholder="Фамилия" value="${esc(p.sur||'')}"><input id="i2" placeholder="Имя" value="${esc(p.nm||'')}"><input id="i5" placeholder="Отчество" value="${esc(p.pat||'')}">
-  <input id="i3" type="tel" placeholder="Номер телефона" value="${esc(p.phone||'')}"><input id="i4" placeholder="Ник в Telegram (@username)" value="${esc(p.tg||'')}">
-  <button class="btn" onclick="doEditPerson('${id}')">Сохранить</button><button class="btn gray" onclick="closeModal()">Отмена</button>`);
+  modal(`<h3>${L('edit_picker')}</h3>
+  <input id="i1" placeholder="${L('surname')}" value="${esc(p.sur||'')}"><input id="i2" placeholder="${L('name')}" value="${esc(p.nm||'')}"><input id="i5" placeholder="${L('patr')}" value="${esc(p.pat||'')}">
+  <input id="i3" type="tel" placeholder="${L('phone_ph')}" value="${esc(p.phone||'')}"><input id="i4" placeholder="${L('tg_ph')}" value="${esc(p.tg||'')}">
+  <button class="btn" onclick="doEditPerson('${id}')">${L('save')}</button><button class="btn gray" onclick="closeModal()">${L('cancel')}</button>`);
 }
 async function doEditPerson(id){
   const p=people.find(x=>x.id===id); if(!p)return;
   const v=i=>document.getElementById(i).value.trim();
   if(!v('i1'))return;
   p.sur=v('i1'); p.nm=v('i2'); p.pat=v('i5'); p.phone=v('i3'); p.tg=v('i4');
-  closeModal(); render(); await savePerson(p); toast('Сохранено ✅');
+  closeModal(); render(); await savePerson(p); toast(L('saved'));
 }
-function delPerson(id){ask('Удалить профиль сборщика вместе с его ошибками?',()=>doDelPerson(id))}
+function delPerson(id){ask(L('confirm_del_picker'),()=>doDelPerson(id))}
 async function doDelPerson(id){
   const p=people.find(x=>x.id===id);
   people=people.filter(x=>x.id!==id); errs=errs.filter(e=>e.p!==id); openId=null; render();
@@ -327,8 +418,8 @@ async function doDelPerson(id){
 }
 
 function addErr(id){
-  if(!types.length){modal(`<h3>Нет типов ошибок</h3><div class="sb" style="margin-bottom:10px">Сначала добавьте их во вкладке «Типы».</div><button class="btn gray" onclick="closeModal()">Ок</button>`);return}
-  modal(`<h3>Выберите тип ошибки</h3>${types.map(t=>`<button class="btn gray" style="margin-bottom:6px" onclick="doAddErr('${id}','${t.id}')">${esc(t.name)}</button>`).join('')}<button class="btn gray" onclick="closeModal()">Отмена</button>`);
+  if(!types.length){modal(`<h3>${L('no_types_title')}</h3><div class="sb" style="margin-bottom:10px">${L('no_types_hint')}</div><button class="btn gray" onclick="closeModal()">${L('ok')}</button>`);return}
+  modal(`<h3>${L('pick_type')}</h3>${types.map(t=>`<button class="btn gray" style="margin-bottom:6px" onclick="doAddErr('${id}','${t.id}')">${esc(t.name)}</button>`).join('')}<button class="btn gray" onclick="closeModal()">${L('cancel')}</button>`);
 }
 async function doAddErr(pid,tid){
   const p=people.find(x=>x.id===pid); if(!p)return;
@@ -337,7 +428,7 @@ async function doAddErr(pid,tid){
   const n=Math.floor((errs.filter(e=>e.p===pid).length-1)/CHUNK);
   const newChunk = n+1>(p.nc||0);
   if(newChunk) p.nc=n+1;
-  closeModal(); render(); toast('Ошибка добавлена: '+fmtDT(ts));
+  closeModal(); render(); toast(L('err_added')+' '+fmtDT(ts));
   if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('warning');
   await saveChunk(pid,n);
   if(newChunk) await savePerson(p);
