@@ -240,17 +240,27 @@ function stats(){
   const mx=Math.max(1,...rows.map(r=>r.c));
   return controls+`<div class="card item" style="margin-top:12px"><span>Всего за период</span><b>${list.length}</b></div>
   ${rows.map(r=>`<div class="card" onclick="sel.p='${r.p.id}';render()"><div class="item"><span class="nm">${esc(pname(r.p))}</span><b>${r.c} ›</b></div><div class="bar"><div style="width:${r.c/mx*100}%"></div></div></div>`).join('')||'<div class="empty">Нет ошибок за период</div>'}
-  <button class="btn" onclick="copyStats()">📋 Скопировать статистику</button>`;
+  <div class="row" style="gap:8px"><button class="btn" onclick="copyStats()">📋 Скопировать</button><button class="btn" onclick="sendStats()">📤 В чат бота</button></div>`;
 }
 
-function copyStats(){
+function statsText(){
   const list=range(), blocks=[];
   people.forEach(p=>{
     const mine=list.filter(e=>e.p===p.id); if(!mine.length)return;
     const cnt={}; mine.forEach(e=>cnt[e.t]=(cnt[e.t]||0)+1);
     blocks.push(pname(p)+'\n'+Object.keys(cnt).map(t=>tname(t)+' - '+cnt[t]).join('\n'));
   });
-  const text=blocks.join('\n\n');
+  return blocks.join('\n\n');
+}
+function sendStats(){
+  const text=statsText();
+  if(!text){toast('Нет данных за период');return}
+  if(!tg||!tg.sendData){toast('Работает только внутри Telegram');return}
+  if(new Blob([text]).size>4096){toast('Слишком много данных — выберите период покороче');return}
+  try{tg.sendData(text)}catch(e){toast('Не удалось отправить. Откройте приложение кнопкой из клавиатуры бота')}
+}
+function copyStats(){
+  const text=statsText();
   if(!text){toast('Нет данных за период');return}
   const fallback=()=>{const a=document.createElement('textarea');a.value=text;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('Скопировано ✅')}catch{toast('Не удалось скопировать')}a.remove()};
   if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(()=>toast('Скопировано ✅'),fallback);
