@@ -73,6 +73,10 @@ nav button.on{color:var(--btn)}
 const tg = window.Telegram && Telegram.WebApp;
 if (tg) { tg.ready(); tg.expand(); try{tg.setHeaderColor('#121212');tg.setBackgroundColor('#121212');tg.setBottomBarColor&&tg.setBottomBarColor('#1c1c1e')}catch(e){} }
 
+/* ---------- Настройки общей базы (Supabase) ---------- */
+const SUPABASE_URL = 'https://rtqjwpacurmshgpzxxuw.supabase.co';   // например: https://abcdxyz.supabase.co
+const SUPABASE_KEY = 'sb_publishable_qcLTk7ButLPZjpN1PfZZXA_qaPkyHvp';   // публичный ключ anon / publishable
+
 /* ---------- Локализация ---------- */
 const I18N = {
 ru:{
@@ -96,7 +100,7 @@ new_picker:'Новый сборщик',surname:'Фамилия',name:'Имя',pa
 confirm_del_picker:'Удалить профиль сборщика вместе с его ошибками?',
 no_types_title:'Нет типов ошибок',no_types_hint:'Сначала добавьте их во вкладке «Типы».',ok:'Ок',
 pick_type:'Выберите тип ошибки',edit_picker:'Редактировать сборщика',err_added:'Ошибка добавлена:',
-settings_title:'Настройки',language:'Язык'
+settings_title:'Настройки',language:'Язык',team_title:'Команда',team_code:'Код команды',team_hint:'Коллега вводит тот же код и видит те же данные. Не передавайте код посторонним.',copy_code:'📋 Скопировать код',code_copied:'Код скопирован ✅',leave_team:'Выйти из команды',confirm_leave:'Выйти из команды на этом устройстве? Данные останутся в общей базе, вернуться можно по коду.',yes_leave:'Да, выйти',gate_title:'Подключение к команде',gate_text:'Данные хранятся в общей базе. Создайте команду и передайте код коллеге — или введите код, который прислал вам коллега.',create_team:'Создать команду',join_team:'Войти по коду',enter_code:'Код команды',bad_code:'Код: от 8 символов, только латиница, цифры, «-» и «_»',team_created:'Команда создана. Скопируйте код и отправьте коллеге ✅',loading:'Загрузка…',load_error:'Не удалось загрузить данные. Проверьте интернет и настройки базы.',retry:'Повторить',save_error:'Не удалось сохранить, данные обновлены с сервера',not_cfg_title:'База данных не настроена',not_cfg_text:'Укажите SUPABASE_URL и SUPABASE_KEY в начале скрипта в index.html.',migrate:'Перенести старые данные в команду',migrate_confirm:'Загрузить в команду данные, которые раньше хранились только в вашем Telegram (сборщики, типы, ошибки)? Повторный перенос дубликатов не создаёт.',yes_migrate:'Да, перенести',migrate_done:'Перенесено ✅',migrate_none:'Старых данных не найдено',migrate_fail:'Не удалось перенести данные'
 },
 en:{
 title:'Picker errors',
@@ -119,7 +123,7 @@ new_picker:'New picker',surname:'Last name',name:'First name',patr:'Patronymic',
 confirm_del_picker:"Delete the picker's profile along with their errors?",
 no_types_title:'No error types',no_types_hint:'Add them first in the “Types” tab.',ok:'OK',
 pick_type:'Choose an error type',edit_picker:'Edit picker',err_added:'Error added:',
-settings_title:'Settings',language:'Language'
+settings_title:'Settings',language:'Language',team_title:'Team',team_code:'Team code',team_hint:'Your colleague enters the same code and sees the same data. Do not share the code with outsiders.',copy_code:'📋 Copy code',code_copied:'Code copied ✅',leave_team:'Leave team',confirm_leave:'Leave the team on this device? The data stays in the shared database, you can come back with the code.',yes_leave:'Yes, leave',gate_title:'Connect to a team',gate_text:'Data is stored in a shared database. Create a team and send the code to your colleague — or enter the code your colleague sent you.',create_team:'Create team',join_team:'Join with code',enter_code:'Team code',bad_code:'Code: at least 8 characters, Latin letters, digits, “-” and “_” only',team_created:'Team created. Copy the code and send it to your colleague ✅',loading:'Loading…',load_error:'Could not load data. Check your internet connection and database settings.',retry:'Retry',save_error:'Could not save, data was refreshed from the server',not_cfg_title:'Database is not configured',not_cfg_text:'Set SUPABASE_URL and SUPABASE_KEY at the top of the script in index.html.',migrate:'Move old data to the team',migrate_confirm:'Upload to the team the data that used to be stored only in your Telegram (pickers, types, errors)? Moving it again does not create duplicates.',yes_migrate:'Yes, move',migrate_done:'Moved ✅',migrate_none:'No old data found',migrate_fail:'Could not move the data'
 },
 uk:{
 title:'Помилки збирачів',
@@ -142,7 +146,7 @@ new_picker:'Новий збирач',surname:'Прізвище',name:"Ім'я",p
 confirm_del_picker:'Видалити профіль збирача разом з його помилками?',
 no_types_title:'Немає типів помилок',no_types_hint:'Спочатку додайте їх на вкладці «Типи».',ok:'Гаразд',
 pick_type:'Оберіть тип помилки',edit_picker:'Редагувати збирача',err_added:'Помилку додано:',
-settings_title:'Налаштування',language:'Мова'
+settings_title:'Налаштування',language:'Мова',team_title:'Команда',team_code:'Код команди',team_hint:'Колега вводить той самий код і бачить ті самі дані. Не передавайте код стороннім.',copy_code:'📋 Скопіювати код',code_copied:'Код скопійовано ✅',leave_team:'Вийти з команди',confirm_leave:'Вийти з команди на цьому пристрої? Дані залишаться в спільній базі, повернутися можна за кодом.',yes_leave:'Так, вийти',gate_title:'Підключення до команди',gate_text:'Дані зберігаються в спільній базі. Створіть команду й передайте код колезі — або введіть код, який надіслав вам колега.',create_team:'Створити команду',join_team:'Увійти за кодом',enter_code:'Код команди',bad_code:'Код: від 8 символів, лише латиниця, цифри, «-» та «_»',team_created:'Команду створено. Скопіюйте код і надішліть колезі ✅',loading:'Завантаження…',load_error:'Не вдалося завантажити дані. Перевірте інтернет і налаштування бази.',retry:'Повторити',save_error:'Не вдалося зберегти, дані оновлено з сервера',not_cfg_title:'Базу даних не налаштовано',not_cfg_text:'Вкажіть SUPABASE_URL і SUPABASE_KEY на початку скрипта в index.html.',migrate:'Перенести старі дані в команду',migrate_confirm:'Завантажити в команду дані, які раніше зберігалися лише у вашому Telegram (збирачі, типи, помилки)? Повторне перенесення дублікатів не створює.',yes_migrate:'Так, перенести',migrate_done:'Перенесено ✅',migrate_none:'Старих даних не знайдено',migrate_fail:'Не вдалося перенести дані'
 }
 };
 const LOCALES = {ru:'ru-RU',en:'en-GB',uk:'uk-UA'};
@@ -172,13 +176,13 @@ const store = {
    people [{id,sur,ini,phone,tg,nc}]   (nc = число блоков с ошибками)
    errs   [{p,t,ts}]                   (человек, тип, время в мс)
    Ошибки хранятся блоками по 100 шт. (лимит CloudStorage 4096 символов на ключ) */
-const CHUNK = 100;
 let types=[], people=[], errs=[];
 let tab='home', openId=null;
 let per = (()=>{const d=new Date();return {from:fmtD(new Date(d.getFullYear(),d.getMonth(),1)),to:fmtD(d)}})();
 let sel = {p:null,t:null};
+let team='', status='loading', loadedOnce=false, pending=0, mutGen=0, sig='', busy=false;
 
-const uid = () => Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2,5);
+const uid = () => (window.crypto&&crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36)+Math.random().toString(36).slice(2,10));
 const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nick = s => { s=(s||'').trim().replace(/^@/,''); return s?'@'+s:'—' };
 const initials = p => p.nm ? (p.nm[0].toUpperCase()+'.'+(p.pat?p.pat[0].toUpperCase()+'.':'')) : (p.ini||'');
@@ -189,26 +193,70 @@ const total = p => errs.reduce((a,e)=>a+(e.p===p.id?1:0),0);
 function fmtD(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const fmtDT = ts => new Date(ts).toLocaleString(LOC(),{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 
-const saveTypes = () => store.set('types', JSON.stringify(types));
-const saveIds = () => store.set('ids', JSON.stringify(people.map(p=>p.id)));
-const savePerson = p => store.set('c_'+p.id, JSON.stringify(p));
-const saveChunk = (pid,n) => store.set('e_'+pid+'_'+n, JSON.stringify(errs.filter(e=>e.p===pid).slice(n*CHUNK,(n+1)*CHUNK).map(e=>[e.t,e.ts])));
+
+/* ---------- Работа с общей базой ---------- */
+async function api(path,opts){
+  opts=opts||{};
+  const auth = SUPABASE_KEY.startsWith('eyJ') ? {Authorization:'Bearer '+SUPABASE_KEY} : {};
+  const r=await fetch(SUPABASE_URL+'/rest/v1/'+path,{
+    method:opts.method||'GET',
+    headers:Object.assign({apikey:SUPABASE_KEY,'x-team':team,'Content-Type':'application/json',Prefer:'return=minimal'},auth,opts.headers||{}),
+    body:opts.body
+  });
+  if(!r.ok) throw new Error(r.status+' '+await r.text());
+  return (opts.method&&opts.method!=='GET') ? null : r.json();
+}
+async function fetchAll(table,select,order){
+  const out=[]; let off=0;
+  for(;;){
+    const rows=await api(table+'?select='+select+'&order='+order+'&limit=1000&offset='+off);
+    out.push(...rows); if(rows.length<1000)break; off+=1000;
+  }
+  return out;
+}
+async function refresh(){
+  if(!team||!SUPABASE_URL||!SUPABASE_KEY||busy)return;
+  busy=true; const gen=mutGen;
+  try{
+    const [ty,pe,er]=await Promise.all([
+      fetchAll('types','id,name','created_at.asc,id.asc'),
+      fetchAll('people','id,sur,nm,pat,ini,phone,tg','created_at.asc,id.asc'),
+      fetchAll('errs','id,p,t,ts','ts.asc,id.asc')
+    ]);
+    if(gen!==mutGen||pending>0)return;
+    const ns=JSON.stringify([ty,pe,er]);
+    status='ok';
+    if(ns!==sig||!loadedOnce){sig=ns; types=ty; people=pe; errs=er; loadedOnce=true; render()}
+  }catch(e){
+    console.error(e);
+    if(!loadedOnce){status='error'; render()}
+  }finally{busy=false}
+}
+async function mutate(fn){
+  pending++; mutGen++;
+  let ok=true;
+  try{await fn()}catch(e){ok=false;console.error(e);toast(L('save_error'))}
+  finally{pending--}
+  if(!ok){sig='';await refresh()} else {sig=JSON.stringify([types,people,errs])}
+  return ok;
+}
+const q = id => encodeURIComponent(id);
+const body = o => JSON.stringify(o);
 
 async function load(){
-  const base = await store.get(['types','ids','lang']);
+  const base = await store.get(['lang','team']);
   if(base.lang && I18N[base.lang]) lang=base.lang;
-  try{types = JSON.parse(base.types||'[]')}catch{types=[]}
-  let ids=[]; try{ids = JSON.parse(base.ids||'[]')}catch{}
-  const data = await store.get(ids.map(i=>'c_'+i));
-  people = ids.map(i=>{try{return JSON.parse(data['c_'+i])}catch{return null}}).filter(Boolean);
-  const keys=[]; people.forEach(p=>{for(let n=0;n<(p.nc||0);n++)keys.push('e_'+p.id+'_'+n)});
-  const ed = await store.get(keys);
-  errs=[];
-  people.forEach(p=>{for(let n=0;n<(p.nc||0);n++){
-    try{(JSON.parse(ed['e_'+p.id+'_'+n]||'[]')).forEach(a=>errs.push({p:p.id,t:a[0],ts:a[1]}))}catch{}
-  }});
+  team = base.team||'';
   render();
+  if(team) await refresh();
 }
+async function setTeam(code){
+  team=code; await store.set('team',code);
+  types=[];people=[];errs=[];sig='';loadedOnce=false;status='loading';openId=null;
+  render(); await refresh();
+}
+setInterval(()=>{ if(document.visibilityState==='visible'&&!document.getElementById('modal').classList.contains('show')) refresh() },20000);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') refresh() });
 
 /* ---------- UI helpers ---------- */
 function modal(html){document.getElementById('mbox').innerHTML=html;document.getElementById('modal').classList.add('show')}
@@ -218,14 +266,47 @@ let tt;function toast(m){const t=document.getElementById('toast');t.textContent=
 
 function render(){
   document.documentElement.lang=lang; document.title=L('title');
+  const cfg=!!(SUPABASE_URL&&SUPABASE_KEY), gate=!cfg||!team;
+  document.getElementById('nav').style.display=gate?'none':'flex';
   document.querySelectorAll('#nav button').forEach(b=>{b.classList.toggle('on',b.dataset.t===tab);b.innerHTML='<i>'+NAV_ICONS[b.dataset.t]+'</i>'+esc(L('nav_'+b.dataset.t))});
   const s=document.getElementById('screen');
-  s.innerHTML = tab==='home'?home(): tab==='list'?(openId?profile():list()): tab==='types'?typesView(): tab==='settings'?settings(): stats();
+  let h;
+  if(!cfg) h=notConfigured();
+  else if(!team) h=gateView();
+  else if(tab==='settings') h=settings();
+  else if(!loadedOnce) h=status==='error'?errorView():`<div class="empty">${L('loading')}</div>`;
+  else h = tab==='home'?home(): tab==='list'?(openId?profile():list()): tab==='types'?typesView(): stats();
+  s.innerHTML=h;
+}
+function langChips(){return `<div class="chips">${[['ru','Русский'],['en','English'],['uk','Українська']].map(([k,n])=>`<button class="chip ${lang===k?'on':''}" onclick="setLang('${k}')">${n}</button>`).join('')}</div>`}
+function notConfigured(){return `<h1>${L('not_cfg_title')}</h1><div class="card sb">${L('not_cfg_text')}</div>`}
+function errorView(){return `<div class="card sb" style="color:var(--text)">${L('load_error')}</div><button class="btn" onclick="retry()">${L('retry')}</button>${team?`<button class="btn gray" onclick="tab='settings';render()">${L('nav_settings')}</button>`:''}`}
+function retry(){status='loading';render();refresh()}
+function gateView(){
+  return `<h1>${L('gate_title')}</h1><div class="card sb" style="color:var(--text)">${L('gate_text')}</div>
+  <button class="btn" onclick="createTeam()">${L('create_team')}</button>
+  <h2>${L('join_team')}</h2>
+  <input id="tc" placeholder="${L('enter_code')}" autocapitalize="off" autocomplete="off" spellcheck="false">
+  <button class="btn gray" onclick="joinTeam()">${L('join_team')}</button>
+  <h2>${L('language')}</h2>${langChips()}`;
+}
+function genCode(){
+  const A='abcdefghjkmnpqrstuvwxyz23456789', a=new Uint32Array(16); crypto.getRandomValues(a);
+  return Array.from(a,x=>A[x%A.length]).join('');
+}
+async function createTeam(){ tab='settings'; await setTeam(genCode()); toast(L('team_created')) }
+async function joinTeam(){
+  const v=document.getElementById('tc').value.trim().toLowerCase();
+  if(!/^[a-z0-9_-]{8,64}$/.test(v)){toast(L('bad_code'));return}
+  tab='home'; await setTeam(v);
 }
 function settings(){
-  const langs=[['ru','Русский'],['en','English'],['uk','Українська']];
-  return `<h1>${L('settings_title')}</h1><h2>${L('language')}</h2>
-  ${langs.map(([k,n])=>`<div class="card item" onclick="setLang('${k}')"><span class="nm">${n}</span><span style="color:var(--btn);font-size:18px">${lang===k?'✓':''}</span></div>`).join('')}`;
+  return `<h1>${L('settings_title')}</h1><h2>${L('language')}</h2>${langChips()}
+  <h2>${L('team_title')}</h2>
+  <div class="card"><div class="sb">${L('team_code')}</div><div class="nm" style="word-break:break-all;margin:6px 0">${esc(team)}</div><div class="sb">${L('team_hint')}</div></div>
+  <button class="btn" onclick="copyText(team,L('code_copied'))">${L('copy_code')}</button>
+  <button class="btn gray" onclick="askMigrate()">${L('migrate')}</button>
+  <button class="btn red" onclick="askLeave()">${L('leave_team')}</button>`;
 }
 async function setLang(k){ if(!I18N[k])return; lang=k; render(); await store.set('lang',k); }
 
@@ -350,12 +431,15 @@ function sendStats(){
   if(new Blob([text]).size>4096){toast(L('too_much'));return}
   try{tg.sendData(text)}catch(e){toast(L('send_fail'))}
 }
+function copyText(text,okMsg){
+  const fallback=()=>{const a=document.createElement('textarea');a.value=text;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast(okMsg)}catch{toast(L('copy_fail'))}a.remove()};
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(()=>toast(okMsg),fallback);
+  else fallback();
+}
 function copyStats(){
   const text=statsText();
   if(!text){toast(L('no_data'));return}
-  const fallback=()=>{const a=document.createElement('textarea');a.value=text;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast(L('copied'))}catch{toast(L('copy_fail'))}a.remove()};
-  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(()=>toast(L('copied')),fallback);
-  else fallback();
+  copyText(text,L('copied'));
 }
 
 /* ---------- Действия ---------- */
@@ -366,7 +450,8 @@ function addType(){
 }
 async function doAddType(){
   const v=document.getElementById('i1').value.trim(); if(!v)return;
-  types.push({id:uid(),name:v}); closeModal(); render(); await saveTypes();
+  const o={id:uid(),name:v}; types.push(o); closeModal(); render();
+  await mutate(()=>api('types',{method:'POST',body:body(o)}));
 }
 function editType(id){
   const t=types.find(x=>x.id===id); if(!t)return;
@@ -374,13 +459,42 @@ function editType(id){
 }
 async function doEditType(id){
   const t=types.find(x=>x.id===id); const v=document.getElementById('i1').value.trim(); if(!t||!v)return;
-  t.name=v; closeModal(); render(); await saveTypes(); toast(L('saved'));
+  t.name=v; closeModal(); render();
+  if(await mutate(()=>api('types?id=eq.'+q(id),{method:'PATCH',body:body({name:v})}))) toast(L('saved'));
 }
 let cb=null;
 function ask(msg,fn){cb=fn;modal(`<h3>${esc(msg)}</h3><button class="btn red" onclick="closeModal();cb&&cb()">${L('yes_del')}</button><button class="btn gray" onclick="closeModal()">${L('cancel')}</button>`)}
+function confirmBox(msg,yes,fn,red){cb=fn;modal(`<h3>${esc(msg)}</h3><button class="btn ${red?'red':''}" onclick="closeModal();cb&&cb()">${esc(yes)}</button><button class="btn gray" onclick="closeModal()">${L('cancel')}</button>`)}
+function askLeave(){confirmBox(L('confirm_leave'),L('yes_leave'),leaveTeam,true)}
+async function leaveTeam(){
+  team=''; types=[];people=[];errs=[];sig='';loadedOnce=false;openId=null;tab='home'; render(); await store.del('team');
+}
+async function legacyRead(){
+  const base=await store.get(['types','ids']);
+  let ty=[],ids=[]; try{ty=JSON.parse(base.types||'[]')}catch{} try{ids=JSON.parse(base.ids||'[]')}catch{}
+  const data=await store.get(ids.map(i=>'c_'+i));
+  const pe=ids.map(i=>{try{return JSON.parse(data['c_'+i])}catch{return null}}).filter(Boolean);
+  const keys=[]; pe.forEach(p=>{for(let n=0;n<(p.nc||0);n++)keys.push('e_'+p.id+'_'+n)});
+  const ed=await store.get(keys), er=[];
+  pe.forEach(p=>{let k=0;for(let n=0;n<(p.nc||0);n++){try{JSON.parse(ed['e_'+p.id+'_'+n]||'[]').forEach(a=>er.push({id:'l_'+p.id+'_'+(k++),p:p.id,t:a[0],ts:a[1]}))}catch{}}});
+  return {ty,pe,er};
+}
+function askMigrate(){confirmBox(L('migrate_confirm'),L('yes_migrate'),doMigrate,false)}
+async function doMigrate(){
+  try{
+    const {ty,pe,er}=await legacyRead();
+    if(!ty.length&&!pe.length&&!er.length){toast(L('migrate_none'));return}
+    const up=(table,rows)=>api(table+'?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:body(rows)});
+    if(ty.length) await up('types',ty.map(t=>({id:t.id,name:t.name})));
+    if(pe.length) await up('people',pe.map(p=>({id:p.id,sur:p.sur||'',nm:p.nm||'',pat:p.pat||'',ini:p.ini||'',phone:p.phone||'',tg:p.tg||''})));
+    for(let i=0;i<er.length;i+=500) await up('errs',er.slice(i,i+500));
+    toast(L('migrate_done')); sig=''; await refresh();
+  }catch(e){console.error(e);toast(L('migrate_fail'))}
+}
 function delType(id){ask(L('confirm_del_type'),()=>doDelType(id))}
 async function doDelType(id){
-  types=types.filter(t=>t.id!==id); render(); await saveTypes();
+  types=types.filter(t=>t.id!==id); render();
+  await mutate(()=>api('types?id=eq.'+q(id),{method:'DELETE'}));
 }
 
 function addPerson(){
@@ -392,8 +506,9 @@ function addPerson(){
 async function doAddPerson(){
   const v=i=>document.getElementById(i).value.trim();
   if(!v('i1')||!v('i2'))return;
-  const p={id:uid(),sur:v('i1'),nm:v('i2'),pat:v('i5'),phone:v('i3'),tg:v('i4'),nc:0};
-  people.push(p); closeModal(); render(); await savePerson(p); await saveIds();
+  const p={id:uid(),sur:v('i1'),nm:v('i2'),pat:v('i5'),phone:v('i3'),tg:v('i4')};
+  people.push(p); closeModal(); render();
+  await mutate(()=>api('people',{method:'POST',body:body(p)}));
 }
 function editPerson(id){
   const p=people.find(x=>x.id===id); if(!p)return;
@@ -407,14 +522,16 @@ async function doEditPerson(id){
   const v=i=>document.getElementById(i).value.trim();
   if(!v('i1'))return;
   p.sur=v('i1'); p.nm=v('i2'); p.pat=v('i5'); p.phone=v('i3'); p.tg=v('i4');
-  closeModal(); render(); await savePerson(p); toast(L('saved'));
+  closeModal(); render();
+  if(await mutate(()=>api('people?id=eq.'+q(id),{method:'PATCH',body:body({sur:p.sur,nm:p.nm,pat:p.pat,phone:p.phone,tg:p.tg})}))) toast(L('saved'));
 }
 function delPerson(id){ask(L('confirm_del_picker'),()=>doDelPerson(id))}
 async function doDelPerson(id){
-  const p=people.find(x=>x.id===id);
   people=people.filter(x=>x.id!==id); errs=errs.filter(e=>e.p!==id); openId=null; render();
-  if(p){for(let n=0;n<(p.nc||0);n++)await store.del('e_'+id+'_'+n); await store.del('c_'+id)}
-  await saveIds();
+  await mutate(async()=>{
+    await api('errs?p=eq.'+q(id),{method:'DELETE'});
+    await api('people?id=eq.'+q(id),{method:'DELETE'});
+  });
 }
 
 function addErr(id){
@@ -422,16 +539,11 @@ function addErr(id){
   modal(`<h3>${L('pick_type')}</h3>${types.map(t=>`<button class="btn gray" style="margin-bottom:6px" onclick="doAddErr('${id}','${t.id}')">${esc(t.name)}</button>`).join('')}<button class="btn gray" onclick="closeModal()">${L('cancel')}</button>`);
 }
 async function doAddErr(pid,tid){
-  const p=people.find(x=>x.id===pid); if(!p)return;
-  const ts=Date.now();
-  errs.push({p:pid,t:tid,ts});
-  const n=Math.floor((errs.filter(e=>e.p===pid).length-1)/CHUNK);
-  const newChunk = n+1>(p.nc||0);
-  if(newChunk) p.nc=n+1;
-  closeModal(); render(); toast(L('err_added')+' '+fmtDT(ts));
+  if(!people.find(x=>x.id===pid))return;
+  const e={id:uid(),p:pid,t:tid,ts:Date.now()};
+  errs.push(e); closeModal(); render(); toast(L('err_added')+' '+fmtDT(e.ts));
   if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('warning');
-  await saveChunk(pid,n);
-  if(newChunk) await savePerson(p);
+  await mutate(()=>api('errs',{method:'POST',body:body(e)}));
 }
 
 document.getElementById('nav').addEventListener('click',e=>{
