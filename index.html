@@ -89,7 +89,7 @@ pickers_title:'Сборщики',no_pickers:'Сборщиков пока нет'
 back:'‹ Назад',phone:'Телефон',telegram:'Telegram',total_errs:'Всего ошибок',add_err:'+ Добавить ошибку',edit_data:'✎ Редактировать данные',
 by_types:'По типам',no_errs:'Ошибок нет',history:'История (дата и время)',empty:'Пусто',del_profile:'Удалить профиль',
 stats_title:'Статистика',today:'Сегодня',d7:'7 дней',month:'Месяц',all_time:'Всё время',from:'С',to:'По',
-no_errs_period:'Нет ошибок за период',total_period:'Всего за период',copy:'📋 Скопировать',send_bot:'📤 В чат бота',
+no_errs_period:'Нет ошибок за период',total_period:'Всего за период',copy:'📋 Скопировать',send_bot:'📤 Отправить',
 no_data:'Нет данных за период',copied:'Скопировано ✅',copy_fail:'Не удалось скопировать',
 tg_only:'Работает только внутри Telegram',too_much:'Слишком много данных — выберите период покороче',
 send_fail:'Не удалось отправить. Откройте приложение кнопкой из клавиатуры бота',
@@ -112,7 +112,7 @@ pickers_title:'Pickers',no_pickers:'No pickers yet',add_picker:'+ Add picker',
 back:'‹ Back',phone:'Phone',telegram:'Telegram',total_errs:'Total errors',add_err:'+ Add error',edit_data:'✎ Edit details',
 by_types:'By type',no_errs:'No errors',history:'History (date and time)',empty:'Empty',del_profile:'Delete profile',
 stats_title:'Statistics',today:'Today',d7:'7 days',month:'Month',all_time:'All time',from:'From',to:'To',
-no_errs_period:'No errors for this period',total_period:'Total for the period',copy:'📋 Copy',send_bot:'📤 To bot chat',
+no_errs_period:'No errors for this period',total_period:'Total for the period',copy:'📋 Copy',send_bot:'📤 Send',
 no_data:'No data for this period',copied:'Copied ✅',copy_fail:'Could not copy',
 tg_only:'Works only inside Telegram',too_much:'Too much data — choose a shorter period',
 send_fail:"Could not send. Open the app using the button from the bot's keyboard",
@@ -135,7 +135,7 @@ pickers_title:'Збирачі',no_pickers:'Збирачів поки немає'
 back:'‹ Назад',phone:'Телефон',telegram:'Telegram',total_errs:'Усього помилок',add_err:'+ Додати помилку',edit_data:'✎ Редагувати дані',
 by_types:'За типами',no_errs:'Помилок немає',history:'Історія (дата й час)',empty:'Порожньо',del_profile:'Видалити профіль',
 stats_title:'Статистика',today:'Сьогодні',d7:'7 днів',month:'Місяць',all_time:'Весь час',from:'Від',to:'До',
-no_errs_period:'Немає помилок за період',total_period:'Усього за період',copy:'📋 Копіювати',send_bot:'📤 У чат бота',
+no_errs_period:'Немає помилок за період',total_period:'Усього за період',copy:'📋 Копіювати',send_bot:'📤 Надіслати',
 no_data:'Немає даних за період',copied:'Скопійовано ✅',copy_fail:'Не вдалося скопіювати',
 tg_only:'Працює лише всередині Telegram',too_much:'Забагато даних — оберіть коротший період',
 send_fail:'Не вдалося надіслати. Відкрийте застосунок кнопкою з клавіатури бота',
@@ -180,7 +180,7 @@ let types=[], people=[], errs=[];
 let tab='home', openId=null;
 let per = (()=>{const d=new Date();return {from:fmtD(new Date(d.getFullYear(),d.getMonth(),1)),to:fmtD(d)}})();
 let sel = {p:null,t:null};
-let team='', status='loading', loadedOnce=false, pending=0, mutGen=0, sig='', busy=false;
+let teamOpen=false, team='', status='loading', loadedOnce=false, pending=0, mutGen=0, sig='', busy=false;
 
 const uid = () => (window.crypto&&crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36)+Math.random().toString(36).slice(2,10));
 const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -294,7 +294,7 @@ function genCode(){
   const A='abcdefghjkmnpqrstuvwxyz23456789', a=new Uint32Array(16); crypto.getRandomValues(a);
   return Array.from(a,x=>A[x%A.length]).join('');
 }
-async function createTeam(){ tab='settings'; await setTeam(genCode()); toast(L('team_created')) }
+async function createTeam(){ tab='settings'; teamOpen=true; await setTeam(genCode()); toast(L('team_created')) }
 async function joinTeam(){
   const v=document.getElementById('tc').value.trim().toLowerCase();
   if(!/^[a-z0-9_-]{8,64}$/.test(v)){toast(L('bad_code'));return}
@@ -302,11 +302,11 @@ async function joinTeam(){
 }
 function settings(){
   return `<h1>${L('settings_title')}</h1><h2>${L('language')}</h2>${langChips()}
-  <h2>${L('team_title')}</h2>
-  <div class="card"><div class="sb">${L('team_code')}</div><div class="nm" style="word-break:break-all;margin:6px 0">${esc(team)}</div><div class="sb">${L('team_hint')}</div></div>
+  <div class="card item" style="margin-top:16px;cursor:pointer" onclick="teamOpen=!teamOpen;render()"><span class="nm">${L('team_title')}</span><span style="color:var(--hint);font-size:18px">${teamOpen?'▾':'▸'}</span></div>
+  ${teamOpen?`<div class="card"><div class="sb">${L('team_code')}</div><div class="nm" style="word-break:break-all;margin:6px 0">${esc(team)}</div><div class="sb">${L('team_hint')}</div></div>
   <button class="btn" onclick="copyText(team,L('code_copied'))">${L('copy_code')}</button>
   <button class="btn gray" onclick="askMigrate()">${L('migrate')}</button>
-  <button class="btn red" onclick="askLeave()">${L('leave_team')}</button>`;
+  <button class="btn red" onclick="askLeave()">${L('leave_team')}</button>`:''}`;
 }
 async function setLang(k){ if(!I18N[k])return; lang=k; render(); await store.set('lang',k); }
 
@@ -417,7 +417,7 @@ function stats(){
   const mx=Math.max(1,...rows.map(r=>r.c));
   return controls+`<div class="card item" style="margin-top:12px"><span>${L('total_period')}</span><b>${list.length}</b></div>
   ${rows.map(r=>`<div class="card" onclick="sel.p='${r.p.id}';render()"><div class="item"><span class="nm">${esc(pname(r.p))}</span><b>${r.c} ›</b></div><div class="bar"><div style="width:${r.c/mx*100}%"></div></div></div>`).join('')||`<div class="empty">${L('no_errs_period')}</div>`}
-  <div class="row" style="gap:8px"><button class="btn" onclick="copyStats()">${L('copy')}</button><button class="btn" onclick="sendStats()">${L('send_bot')}</button></div>`;
+  <button class="btn" onclick="sendStats()">${L('send_bot')}</button>`;
 }
 
 function statsText(){
@@ -441,11 +441,6 @@ function copyText(text,okMsg){
   const fallback=()=>{const a=document.createElement('textarea');a.value=text;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast(okMsg)}catch{toast(L('copy_fail'))}a.remove()};
   if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(()=>toast(okMsg),fallback);
   else fallback();
-}
-function copyStats(){
-  const text=statsText();
-  if(!text){toast(L('no_data'));return}
-  copyText(text,L('copied'));
 }
 
 /* ---------- Действия ---------- */
@@ -473,7 +468,7 @@ function ask(msg,fn){cb=fn;modal(`<h3>${esc(msg)}</h3><button class="btn red" on
 function confirmBox(msg,yes,fn,red){cb=fn;modal(`<h3>${esc(msg)}</h3><button class="btn ${red?'red':''}" onclick="closeModal();cb&&cb()">${esc(yes)}</button><button class="btn gray" onclick="closeModal()">${L('cancel')}</button>`)}
 function askLeave(){confirmBox(L('confirm_leave'),L('yes_leave'),leaveTeam,true)}
 async function leaveTeam(){
-  team=''; types=[];people=[];errs=[];sig='';loadedOnce=false;openId=null;tab='home'; render(); await store.del('team');
+  team=''; teamOpen=false; types=[];people=[];errs=[];sig='';loadedOnce=false;openId=null;tab='home'; render(); await store.del('team');
 }
 async function legacyRead(){
   const base=await store.get(['types','ids']);
