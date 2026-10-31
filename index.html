@@ -84,6 +84,9 @@ if (tg) { tg.ready(); tg.expand(); try{tg.setHeaderColor('#121212');tg.setBackgr
 const SUPABASE_URL = 'https://rtqjwpacurmshgpzxxuw.supabase.co';   // например: https://abcdxyz.supabase.co
 const SUPABASE_KEY = 'sb_publishable_qcLTk7ButLPZjpN1PfZZXA_qaPkyHvp';   // публичный ключ anon / publishable
 
+// Версия сборки (видна внизу Настроек) — по ней можно понять, загрузилась ли новая версия.
+const APP_VERSION = '2026-10-31 · 2';
+
 // Ваш Telegram ID (число). Он виден в Настройки → Пользователи. Если указан — вы всегда «Владелец».
 // Если пусто — владельцем становится тот, кто первым открыл команду после обновления.
 const APP_OWNER_ID = '';
@@ -346,7 +349,11 @@ async function loadSupplies(){
 }
 const supNum = v => { const n=parseFloat(String(v).replace(',','.')); return isFinite(n)&&n>=0?Math.round(n*100)/100:null };
 const supPcs = (q,m) => Math.round(q*m*100)/100;
-const supSub = (c,i) => c.m>0 ? (supQty(supPcs(i.q,c.m))+' '+(i.u||'')).trim() : (i.u||'');
+// Множитель «штук в одном листе». Для записей, созданных до появления множителя (m не задан), берём стандартный: Пломбы = 160.
+const supDefMult = name => (SUP_TPL.find(t=>t[0]===name)||[])[2]||0;
+const supM = c => c.m!==undefined ? (Number(c.m)||0) : supDefMult(c.n);
+const supTplMult = c => c.mult>0 ? c.mult : (supMultOk ? 0 : supDefMult(c.name));
+const supSub = (c,i) => { const m=supM(c); return m>0 ? (supQty(supPcs(i.q,m))+' '+(i.u||'')).trim() : (i.u||'') };
 const supQty = n => String(Math.round(n*100)/100).replace('.',',');
 const supCatName = id => { const c=supCats.find(x=>x.id===id); return c?c.name:'' };
 const supRec = () => supRecs.find(r=>r.id===supRecId);
@@ -407,7 +414,7 @@ function supSave(rid){
 }
 function supSetQty(ci,ii){ if(!need())return;
   const r=supRec(); if(!r)return; const it=r.data.cats[ci].items[ii]; if(!it)return;
-  modal(`<h3 style="word-break:break-word">${esc(it.n)}</h3><div class="sb" style="margin-bottom:8px">${L('sup_set_qty')}${r.data.cats[ci].m>0?' (× '+r.data.cats[ci].m+')':(it.u?' ('+esc(it.u)+')':'')}</div>
+  modal(`<h3 style="word-break:break-word">${esc(it.n)}</h3><div class="sb" style="margin-bottom:8px">${L('sup_set_qty')}${supM(r.data.cats[ci])>0?' (× '+supM(r.data.cats[ci])+')':(it.u?' ('+esc(it.u)+')':'')}</div>
   <input id="i1" inputmode="decimal" value="${supQty(it.q)}"><button class="btn" onclick="supDoSetQty(${ci},${ii})">${L('save')}</button><button class="btn gray" onclick="closeModal()">${L('cancel')}</button>`);
   setTimeout(()=>{const e=document.getElementById('i1'); if(e){e.focus();e.select()}},50);
 }
@@ -430,7 +437,7 @@ function supNewRec(){ if(!need())return;
 async function supCreateRec(copy){ if(!need())return;
   const last=copy?supRecs[0]:null;
   const old=(cn,n)=>{ if(!last)return 0; const c=last.data.cats.find(x=>x.n===cn), it=c&&c.items.find(x=>x.n===n); return it?it.q:0 };
-  const cats=[...supCats].sort((a,b)=>a.ord-b.ord).map(c=>({n:c.name,...(c.mult>0?{m:c.mult}:{}),items:supItems.filter(i=>i.cat===c.id).map(i=>({n:i.name,u:i.unit||'',q:old(c.name,i.name)}))})).filter(c=>c.items.length);
+  const cats=[...supCats].sort((a,b)=>a.ord-b.ord).map(c=>({n:c.name,m:supTplMult(c),items:supItems.filter(i=>i.cat===c.id).map(i=>({n:i.name,u:i.unit||'',q:old(c.name,i.name)}))})).filter(c=>c.items.length);
   const o={id:uid(),ts:Date.now(),who:actorName(),data:{cats}};
   supRecs.unshift(o); supRecId=o.id; closeModal(); render();
   if(await mutate(()=>api('supply_records',{method:'POST',body:body(o)}))) logAct('sup_rec_add',{rec:recTitle(o)});
@@ -441,7 +448,7 @@ function tplView(){
   const head=`<button class="back" onclick="supCloseTpl()">${L('back')}</button><h1>${L('sup_tpl_title')}</h1>`;
   const cards=supCats.map(c=>{
     const its=supItems.filter(i=>i.cat===c.id);
-    return `<div class="card"><div class="item" style="margin-bottom:4px"><span class="nm" style="font-size:17px;word-break:break-word">${esc(c.name)}${c.mult>0?` <span class="sb">× ${c.mult}</span>`:''}</span><span class="acts"><button class="ed" onclick="supEditCat('${c.id}')">✎</button></span></div>
+    return `<div class="card"><div class="item" style="margin-bottom:4px"><span class="nm" style="font-size:17px;word-break:break-word">${esc(c.name)}${supTplMult(c)>0?` <span class="sb">× ${supTplMult(c)}</span>`:''}</span><span class="acts"><button class="ed" onclick="supEditCat('${c.id}')">✎</button></span></div>
     ${its.map(i=>`<div class="item" style="padding:8px 0;border-top:1px solid var(--line);cursor:pointer" onclick="supEditItem('${i.id}')"><div style="min-width:0;flex:1;word-break:break-word">${esc(i.name)}</div><div class="sb">${esc(i.unit||'')}</div></div>`).join('')}
     <button class="chip" style="margin-top:8px" onclick="supAddItem('${c.id}')">+ ${L('sup_add_item')}</button></div>`;
   }).join('');
@@ -534,7 +541,7 @@ async function supDoDelItem(id){ if(!need())return;
 /* --- экспорт записи: текст и картинка --- */
 function suppliesText(r){
   r=r||supRec(); if(!r)return '';
-  return r.data.cats.filter(c=>c.items.length).map(c=>'[ '+c.n+' ]\n'+c.items.map(i=>(c.m>0?'• '+i.n+' — '+supQty(i.q)+' × '+c.m+' = '+supQty(supPcs(i.q,c.m))+' '+(i.u||''):'• '+i.n+' — '+supQty(i.q)+' '+(i.u||'')).trim()).join('\n')).join('\n\n');
+  return r.data.cats.filter(c=>c.items.length).map(c=>'[ '+c.n+' ]\n'+c.items.map(i=>(supM(c)>0?'• '+i.n+' — '+supQty(i.q)+' × '+supM(c)+' = '+supQty(supPcs(i.q,supM(c)))+' '+(i.u||''):'• '+i.n+' — '+supQty(i.q)+' '+(i.u||'')).trim()).join('\n')).join('\n\n');
 }
 function sendSupplies(){
   const text=suppliesText();
@@ -744,7 +751,8 @@ function settings(){
   ${teamOpen?`<div class="card"><div class="sb">${L('team_code')}</div><div class="nm" style="word-break:break-all;margin:6px 0">${esc(team)}</div><div class="sb">${L('team_hint')}</div></div>
   <button class="btn" onclick="copyText(team,L('code_copied'))">${L('copy_code')}</button>
   ${myRole()==='owner'?`<button class="btn gray" onclick="askMigrate()">${L('migrate')}</button>`:''}
-  <button class="btn red" onclick="askLeave()">${L('leave_team')}</button>`:''}`;
+  <button class="btn red" onclick="askLeave()">${L('leave_team')}</button>`:''}
+  <div class="sb" style="text-align:center;margin:18px 0 4px">v ${APP_VERSION}</div>`;
 }
 async function setLang(k){ if(!I18N[k])return; lang=k; render(); await store.set('lang',k); }
 
